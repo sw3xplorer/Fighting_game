@@ -1,5 +1,15 @@
-﻿// using System.Media; (Importerar System.Media)
+﻿// using System.Media; //(Importerar System.Media)
 // SoundPlayer battle = new SoundPlayer(@""); (SoundPlayer definerar varabeln battle som en "ljudfil")
+
+// Fighter player = new Fighter();
+// Fighter enemy = new Fighter();
+
+// player.PlayerChooseName();
+
+
+// player.Attack(enemy);
+// enemy.Attack(player);
+
 
 // battle.PlayLooping(); (loopar ljudfilen)
 // battle.Stop(); (stoppar ljudfilen)
@@ -9,7 +19,8 @@ Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
 //Sätter programmet i "fullscreen"
 
 // screen dimensions: Widht: 174 Height: 43
-Console.WriteLine("USE FULLSCREEN FOR BEST EXPERIENCE! OTHERWISE STUFF WILL BREAK");
+Console.WriteLine("Not finished becasuse I'm bad at coding :(");
+Console.WriteLine("\nUSE FULLSCREEN FOR BEST EXPERIENCE! OTHERWISE STUFF WILL BREAK");
 Console.WriteLine("NOTE: All characters belong to their respective copyright owners.");
 Console.Write("Press enter to start: ");
 Console.ReadLine();
@@ -40,7 +51,8 @@ Console.Clear();
 
 string confirm_character = "";
 int player_char = 0;
-int player_hp = 0;
+int player_MaxHP = 0;
+int player_CurrentHP = 0;
 int player_speed = 0;
 int player_dmg_red = 0;
 int player_attack1 = 0;
@@ -233,8 +245,8 @@ _  ___ / /_ / /_ / /_/ // /__ _  ,<  _(__  )
                                             ");
         Task.Delay(1000).Wait();
         Console.WriteLine("\nSlash: 30 DMG");
-        Console.WriteLine("\nOctaslash: 35-90 DMG");
         Console.WriteLine("\nShadowflare: Burn for 15 DMG per turn for 5 turns");
+        Console.WriteLine("\nOctaslash: 35-90 DMG");
         Console.WriteLine("\nGigaflare: 200 DMG");
         Console.WriteLine("\nPASSIVE: One Winged form");
         Task.Delay(750).Wait();
@@ -587,36 +599,47 @@ _  ___ / /_ / /_ / /_/ // /__ _  ,<  _(__  )
 
 }
 
-
-
 Console.Clear();
+int[] array_hp = { 250, 350, 200, 275, 250 };
+int[] array_attack1 = { 20, 30, 20, 30, 20 };
+int[] array_attack2 = { };
+
 if (player_char == 1)
 {
-    player_hp = 250;
+    player_MaxHP = 250;
+    player_CurrentHP = player_MaxHP;
     player_speed = 5;
     player_dmg_red = 0;
     player_attack1 = 20;
     player_attack2 = 35;
     player_attack3 = 60;
-    player_attack4 = player_hp += 40;
+    player_attack4 = player_CurrentHP += 40;
+    if (player_MaxHP - player_CurrentHP < 40)
+    {
+        player_attack4 = player_CurrentHP += player_MaxHP - player_CurrentHP;
+    }
+    else
+    {
+        player_attack4 = player_CurrentHP += 40;
+    }
 }
 
 else if (player_char == 2)
 {
-    player_hp = 350;
+    player_MaxHP = 350;
     player_speed = 3;
     player_dmg_red = 0;
     player_attack1 = 30;
-    player_attack2 = Generator.Next(35, 91);
-    player_attack3 = 15;
+    player_attack2 = 0;
+    player_attack3 = Generator.Next(35, 91);
     player_attack4 = 200;
     // while (player_hp < 105)
     // {
     //     player_speed = 7;
     //     player_dmg_red = 10;
     //     player_attack1 = 45;
-    //     player_attack2 = Generator.Next(50, 106);
-    //     player_attack3 = 30;
+    //     player_attack2 = 0;
+    //     player_attack3 = Generator.Next(50, 106);
     //     player_attack4 = 215;
     // }
 
@@ -624,7 +647,7 @@ else if (player_char == 2)
 
 else if (player_char == 3)
 {
-    player_hp = 200;
+    player_MaxHP = 200;
     player_speed = 9;
     player_dmg_red = 0;
     player_attack1 = 20;
@@ -635,7 +658,7 @@ else if (player_char == 3)
 
 else if (player_char == 4)
 {
-    player_hp = 275;
+    player_MaxHP = 275;
     player_speed = 8;
     player_dmg_red = 0;
     player_attack1 = 30;
@@ -648,7 +671,7 @@ else
 {
     int chord_buff = 10;
     int bonus_dmg = chord_buff * player_attack3;
-    player_hp = 250;
+    player_MaxHP = 250;
     player_speed = 6;
     player_dmg_red = 0;
     player_attack1 = 20 + bonus_dmg;
@@ -656,7 +679,7 @@ else
     player_attack3 += 1;
     player_attack4 = 100 + bonus_dmg;
 }
-int player_maxHP = player_hp;
+
 
 // Enemy
 int enemy_player = Generator.Next(1, 5);
@@ -749,13 +772,13 @@ Console.Clear();
 
 //UI och combat
 
-while (player_hp > 0 && enemy_hp > 0)
+while (player_MaxHP > 0 && enemy_hp > 0)
 {
-    HPbar(18, 3, player_maxHP, player_hp);
-    HPbar(105, 3, enemy_maxHP, enemy_hp);
+    HPbar(5, 10, player_MaxHP, player_CurrentHP);
+    HPbar(65, 10, enemy_maxHP, enemy_hp);
     MenuLine();
-    PlayerAttacks();
-    Menu();
+    string[] attacks = PlayerAttacks();
+    Menu(attacks);
     Console.ReadLine();
 }
 
@@ -765,17 +788,23 @@ while (player_hp > 0 && enemy_hp > 0)
 
 //Plats för static void saker
 
-void PlayerAttacks() //Namnger attackerna beroende på karaktär så att det är mer tydligt vilken attack man använder
+string[] PlayerAttacks() //Namnger attackerna beroende på karaktär så att det är mer tydligt vilken attack man använder
 {
     string[] Attacks1 = { "Punch", "Body Slam", "Roll", "Rest" };
-    string[] Attacks2 = { "Slash", "Octaslash", "Shadowflare", "Gigaflare" };
+    string[] Attacks2 = { "Slash", "Shadowflare", "Octaslash", "Gigaflare" };
     string[] Attacks3 = { "Wall Slam", "Curse", "Bone Barrage", "Mega Blast" };
     string[] Attacks4 = { "Dash", "Rapid Fire", "Sword Combo", "Sin Devil Trigger" };
     string[] Attacks5 = { "Flute Slash", "Block", "Chord", "Chorus" };
     Array[] Attacks = { Attacks1, Attacks2, Attacks3, Attacks4, Attacks5 }; //Lägger alla attack arrays i en stor array
     string[] AttackName = (string[])Attacks[player_char - 1]; //väljer namnen för attackerna utifrån vem man kör
-    Console.WriteLine(AttackName[2]);
-    Console.ReadLine();
+    // Console.SetCursorPosition(4, 41);
+    // Console.Write($"{AttackName[0]}   ");
+    // Console.Write($"{AttackName[1]}   ");
+    // Console.Write($"{AttackName[2]}   ");
+    // Console.Write($"{AttackName[3]}   ");
+
+    return AttackName;
+    //Console.ReadLine();
 }
 
 static (int, int, int) Challanger(int enemy_player)
@@ -795,12 +824,14 @@ static (int, int, int) Challanger(int enemy_player)
 
 }
 
-static void HPbar(int x, int y, int MaxHP, int CurrentHP)
+static void HPbar(float x, float y, int MaxHP, int CurrentHP)
 // CurrentHP/MaxHP *45 ger hur mycket hp man har kvar i procent
 {
-    Console.SetCursorPosition(x, y);
+    x = Console.WindowWidth * (x / 100);
+    y = Console.WindowHeight * (y / 100);
+    Console.SetCursorPosition((int)x, (int)y);
     Console.Write("<");
-    for (var i = 0; i < 45; i++) // i är längden på hp bar, den ska fortsätta expandera tills den är 45 pixlar
+    for (var i = 0; i < Console.WindowWidth * 0.25; i++) // i är längden på hp bar, den ska fortsätta expandera tills den är 45 pixlar
     // när CurrentHP är mindre än i (45) så kommer delen som saknas färgas röd. 
     {
         if (CurrentHP > i)
@@ -814,7 +845,7 @@ static void HPbar(int x, int y, int MaxHP, int CurrentHP)
         Console.Write("█");
     }
     Console.ResetColor();
-    Console.SetCursorPosition(x + 45, y);
+    Console.SetCursorPosition((int)x + 45, (int)y);
     Console.WriteLine($">{CurrentHP}/{MaxHP}  ");
 }
 
@@ -827,17 +858,42 @@ static void MenuLine()
     }
 }
 
-void Menu()
+void Menu(string[] AttackName)
 {
     int choice = 0;
-    Console.SetCursorPosition(4, 41);
-    Console.Write(AttackName[0]);
-    Console.Write(AttackName[1]);
-    Console.Write(AttackName[2]);
-    Console.Write(AttackName[3]);
-    // while (true)
-    // {
-    // }
+    while (true)
+    {
+        Console.SetCursorPosition(1, 42);
+        Console.Write($"{AttackName[0]}");
+        Console.SetCursorPosition((int)(Console.WindowWidth * 0.25) + 1, 42);
+        Console.Write($"{AttackName[1]}");
+        Console.SetCursorPosition((int)(Console.WindowWidth * 0.5) + 1, 42);
+        Console.Write($"{AttackName[2]}");
+        Console.SetCursorPosition((int)(Console.WindowWidth * 0.75) + 1, 42);
+        Console.Write($"{AttackName[3]}");
+        Console.SetCursorPosition(choice * (int)(Console.WindowWidth * 0.25), 42);
+
+        Console.Write(">");
+        var key = Console.ReadKey(true);   //readkey är som readline men reagerar direkt när man trycker istället för bara enter
+        if (key.Key == ConsoleKey.RightArrow || key.Key == ConsoleKey.D && choice < 3)  //true gör så att man inte ritar det man skriver
+        {
+            choice++;
+        }
+        else if (key.Key == ConsoleKey.LeftArrow || key.Key == ConsoleKey.A && choice > 0)
+        {
+            choice--;
+        }
+        else if (key.Key == ConsoleKey.Enter)
+        {
+            // switch (choice)
+            // {
+            //     case 0:
+            //     attack = attack1
+            //        
+            // }
+
+        }
+    }
 
 }
 
@@ -847,6 +903,11 @@ void Menu()
 //     return ()
 // }
 
+
+// void combat()
+// {
+//     player_attack1
+// }
 
 Console.WriteLine("It works");
 Console.ReadLine();
